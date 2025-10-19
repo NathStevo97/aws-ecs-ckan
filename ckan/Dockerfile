@@ -1,6 +1,11 @@
 FROM python:3.14-slim-bookworm@sha256:f241b2f9bf06e07f4018c9f84d4910c0bc3066a42945ddedc715afa6867e5551
 
-COPY ./requirements.txt ./requirements.txt
+# System deps:
+RUN apt-get update && apt-get install -y curl \
+    && curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+    && poetry self add poetry-plugin-export \
+    && poetry --version
 
 # install dependencies
 RUN apt-get -q -y update \
@@ -40,26 +45,30 @@ RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
 
 # configure ckan virtual environment
 RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH \
-    && virtualenv $CKAN_VENV \
-    && ln -s $CKAN_VENV/bin/pip /usr/local/bin/ckan-pip \
-    && ln -s $CKAN_VENV/bin/ckan /usr/local/bin/ckan
+    && virtualenv $CKAN_VENV
 
 # pull the ckan source code
-RUN git clone --progress https://github.com/ckan/ckan.git $CKAN_SRC \
-    && cd $CKAN_SRC \
-    && git checkout tags/ckan-2.11.2 \
-    && rm -rf .git .github
+RUN git clone --progress https://github.com/ckan/ckan.git $CKAN_SRC
+
+WORKDIR $CKAN_SRC
+
+RUN git checkout tags/ckan-2.11.3 && rm -rf .git .github
+
+COPY pyproject.toml poetry.lock ./
+
+# after virtualenv creation and after the CKAN source has been cloned (ensure CKAN_SRC points to source)
+RUN poetry export -f requirements.txt --output $CKAN_SRC/requirements.txt
+
+RUN pip install --upgrade -r $CKAN_SRC/requirements.txt
 
 # install ckan
-RUN ckan-pip install -U pip \
-    && ckan-pip install --upgrade --no-cache-dir -r $CKAN_SRC/requirements.txt \
-    && ckan-pip install -e $CKAN_SRC/ \
-    && ln -s $CKAN_SRC/ckan/config/who.ini $CKAN_CONFIG/who.ini \
-    && chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+RUN pip install --upgrade --no-cache-dir -r $CKAN_SRC/requirements.txt
+RUN ln -s $CKAN_SRC/ckan/config/who.ini $CKAN_CONFIG/who.ini
+RUN chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
 
 ## install pages plugin
-RUN ckan-pip install --upgrade --no-cache-dir pylons
-RUN ckan-pip install -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
+RUN pip install --upgrade --no-cache-dir pylons
+RUN pip install -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
 
 # Install custom files
 #COPY img/* $CKAN_SRC/ckan/public/base/images/
@@ -83,8 +92,6 @@ RUN ckan-pip install -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckane
 #RUN cat $CKAN_SRC/tmp/extra-helper-functions.py >> $CKAN_SRC/ckan/lib/helpers.py
 # Override robots.txt
 #RUN cp $CKAN_SRC/tmp/robots.txt $CKAN_SRC/ckan/public/robots.txt
-
-RUN pip install setuptools==78.1.1
 
 # customize container entrypoint that will configure the application
 COPY ckan-entrypoint.sh /ckan-entrypoint.sh
