@@ -47,6 +47,8 @@ services:
     image: ckan-datapusher
     build:
       context: ./ckan-datapusher
+    environment:
+    - DATAPUSHER_PORT=8800
     expose:
     - 8800
     ports:

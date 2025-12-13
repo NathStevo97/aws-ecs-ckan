@@ -1,11 +1,4 @@
-FROM python:3.14-slim-bookworm@sha256:f241b2f9bf06e07f4018c9f84d4910c0bc3066a42945ddedc715afa6867e5551
-
-# System deps:
-RUN apt-get update && apt-get install -y curl \
-    && curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
-    && poetry self add poetry-plugin-export \
-    && poetry --version
+FROM python:3.9-slim-bookworm@sha256:e11ce62ece77a134eae605d7c76a2515b65f882d7f6d1fa57096a1dff9b723af
 
 # install dependencies
 RUN apt-get -q -y update \
@@ -33,65 +26,57 @@ RUN apt-get -q -y update \
 RUN pip install --upgrade awscli
 RUN pip install --upgrade virtualenv
 
-# ckan install environment
-ENV CKAN_HOME=/usr/lib/ckan
-ENV CKAN_VENV=$CKAN_HOME/venv
-ENV CKAN_CONFIG=/etc/ckan
-ENV CKAN_STORAGE_PATH=/var/lib/ckan
-ENV CKAN_SRC=$CKAN_VENV/src
+
+# --- install Poetry & plugin ---
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+ && curl -sSL https://install.python-poetry.org | python3 - \
+ && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+ && poetry self add poetry-plugin-export \
+ && poetry --version
+
+# --- CKAN environment variables ---
+ENV CKAN_HOME=/usr/lib/ckan \
+    CKAN_VENV=/usr/lib/ckan/venv \
+    CKAN_CONFIG=/etc/ckan \
+    CKAN_STORAGE_PATH=/var/lib/ckan \
+    CKAN_SRC=/usr/lib/ckan/src
 
 # ckan user account
 RUN useradd -r -u 900 -m -c "ckan account" -d $CKAN_HOME -s /bin/false ckan
 
-# configure ckan virtual environment
+# --- set up virtualenv and directories ---
 RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH \
-    && virtualenv $CKAN_VENV
+ && python3 -m venv $CKAN_VENV
 
-# pull the ckan source code
-RUN git clone --progress https://github.com/ckan/ckan.git $CKAN_SRC
+# --- clone CKAN source ---
+RUN git clone --depth 1 --branch ckan-2.11.3 https://github.com/ckan/ckan.git $CKAN_SRC
 
+# --- copy your Poetry files somewhere safe (not inside CKAN source) ---
+COPY pyproject.toml poetry.lock /tmp/
+
+# --- export dependencies using Poetry ---
+WORKDIR /tmp
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+# --- install dependencies into CKAN virtualenv ---
+RUN $CKAN_VENV/bin/pip install --upgrade pip setuptools wheel \
+ && $CKAN_VENV/bin/pip install --no-cache-dir -r requirements.txt
+
+# --- install CKAN itself into the same venv ---
+RUN $CKAN_VENV/bin/pip install --no-cache-dir -e $CKAN_SRC
+
+# --- optional CKAN plugins/extensions ---
+RUN $CKAN_VENV/bin/pip install --no-cache-dir -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
+
+# --- finalize runtime setup ---
+RUN ln -s $CKAN_SRC/ckan/config/who.ini $CKAN_CONFIG/who.ini \
+ && chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
+
+# --- ensure CKAN CLI available globally ---
+ENV PATH="$CKAN_VENV/bin:$PATH"
+
+# --- set working dir back to CKAN source ---
 WORKDIR $CKAN_SRC
-
-RUN git checkout tags/ckan-2.11.3 && rm -rf .git .github
-
-COPY pyproject.toml poetry.lock ./
-
-# after virtualenv creation and after the CKAN source has been cloned (ensure CKAN_SRC points to source)
-RUN poetry export -f requirements.txt --output $CKAN_SRC/requirements.txt
-
-RUN pip install --upgrade -r $CKAN_SRC/requirements.txt
-
-# install ckan
-RUN pip install --upgrade --no-cache-dir -r $CKAN_SRC/requirements.txt
-RUN ln -s $CKAN_SRC/ckan/config/who.ini $CKAN_CONFIG/who.ini
-RUN chown -R ckan:ckan $CKAN_HOME $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH
-
-## install pages plugin
-RUN pip install --upgrade --no-cache-dir pylons
-RUN pip install -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
-
-# Install custom files
-#COPY img/* $CKAN_SRC/ckan/public/base/images/
-# COPY overrides/* $CKAN_SRC/tmp/
-#RUN mkdir $CKAN_SRC/tmp
-#RUN mkdir $CKAN_SRC/tmp/css
-#COPY html/* $CKAN_SRC/tmp/
-#COPY css/* $CKAN_SRC/tmp/css
-#RUN cp $CKAN_SRC/tmp/promoted.html $CKAN_SRC/ckan/templates/home/snippets/promoted.html
-#RUN cp $CKAN_SRC/tmp/search.html $CKAN_SRC/ckan/templates/home/snippets/search.html
-#RUN cp $CKAN_SRC/tmp/layout4.html $CKAN_SRC/ckan/templates/home/layout4.html
-#RUN cp $CKAN_SRC/tmp/index.html $CKAN_SRC/ckan/templates/home/index.html
-#RUN cp $CKAN_SRC/tmp/header.html $CKAN_SRC/ckan/templates/header.html
-#RUN cp $CKAN_SRC/tmp/page.html $CKAN_SRC/ckan/templates/page.html
-#RUN cp $CKAN_SRC/tmp/css/main.css $CKAN_SRC/ckan/public/base/css/main.css
-
-# Copy header override; this can probably be removed when upgrade to python3 happens
-# to use the official googleanalytics plugin instead
-#RUN cp $CKAN_SRC/tmp/header.html $CKAN_SRC/ckan/templates/header.html
-# Add extra helper functions
-#RUN cat $CKAN_SRC/tmp/extra-helper-functions.py >> $CKAN_SRC/ckan/lib/helpers.py
-# Override robots.txt
-#RUN cp $CKAN_SRC/tmp/robots.txt $CKAN_SRC/ckan/public/robots.txt
 
 # customize container entrypoint that will configure the application
 COPY ckan-entrypoint.sh /ckan-entrypoint.sh
@@ -101,6 +86,9 @@ RUN chmod +x /ckan-entrypoint.sh
 #ENV CKAN_INI=/etc/ckan/production.ini.unconfigured
 ENV CKAN_INI=/etc/ckan/production.ini
 ENV CKAN_PORT=5000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -fsS http://localhost:5000/api/action/status_show || exit 1
 
 ENTRYPOINT ["/ckan-entrypoint.sh"]
 CMD ["bash", "-c", "ckan run --host 0.0.0.0 --port $CKAN_PORT --threaded"]

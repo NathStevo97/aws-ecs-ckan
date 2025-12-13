@@ -5,6 +5,28 @@ ERROR=0
 # CKAN
 # configuration for the ckan application
 
+# --- CKAN venv bootstrap ---
+CKAN_VENV=${CKAN_VENV:-/usr/lib/ckan/venv}
+
+if [ -d "$CKAN_VENV" ]; then
+  echo "Activating CKAN virtualenv at $CKAN_VENV"
+  # shellcheck disable=SC1091
+  source "$CKAN_VENV/bin/activate"
+else
+  echo "WARNING: CKAN_VENV path '$CKAN_VENV' not found. Attempting to proceed with system Python."
+fi
+
+# verify ckan CLI is available
+if ! command -v ckan >/dev/null 2>&1; then
+  if [ -f "$CKAN_VENV/bin/ckan" ]; then
+    echo "CKAN CLI not on PATH, invoking directly from venv"
+    alias ckan="$CKAN_VENV/bin/ckan"
+  else
+    echo "CKAN CLI not found, attempting python -m ckan fallback"
+    alias ckan="python -m ckan"
+  fi
+fi
+
 export CKAN_PORT=${CKAN_PORT:-5000}
 export CKAN_SITE_ID=${CKAN_SITE_ID:-default}
 export BYPASS_INIT=${BYPASS_INIT:-0}

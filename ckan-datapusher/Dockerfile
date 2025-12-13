@@ -1,4 +1,4 @@
-FROM python:3.14-slim-bookworm@sha256:f241b2f9bf06e07f4018c9f84d4910c0bc3066a42945ddedc715afa6867e5551
+FROM python:3.9-slim-bookworm@sha256:e11ce62ece77a134eae605d7c76a2515b65f882d7f6d1fa57096a1dff9b723af
 
 ENV DATAPUSHER_HOME=/usr/lib/ckan/datapusher
 
@@ -22,7 +22,7 @@ RUN apt-get update \
 WORKDIR $DATAPUSHER_HOME/src
 
 # clone the datapusher repository
-# this was 0.0.17, which, is no longer loading certain python modules.
+# this was 0.0.20, which, is no longer loading certain python modules.
 RUN git clone -b '0.0.20' https://github.com/ckan/datapusher.git
 
 WORKDIR $DATAPUSHER_HOME/src/datapusher

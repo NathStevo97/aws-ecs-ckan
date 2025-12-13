@@ -1,4 +1,4 @@
-name: Docker & Terraform CI
+name: CI
 
 on:
   push:
@@ -7,7 +7,52 @@ on:
     branches: [ "main" ]
 
 jobs:
-  code-quality:
+  terraform-format:
+
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Chekout the Repo
+      uses: actions/checkout@v4
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.8
+    - name: Initialize Terraform
+      id: init
+      run: terraform init
+    - name: Terraform Format
+      id: fmt
+      run: terraform fmt -check
+
+  terraform-validate:
+
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Chekout the Repo
+      uses: actions/checkout@v4
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.8
+    - name: Initialize Terraform
+      id: init
+      run: terraform init
+    - name: terraform validate
+      id: validate
+      if: (success() || failure())
+      run: terraform validate
+
+  tf-lint:
 
     defaults:
       run:
@@ -19,23 +64,15 @@ jobs:
     - name: Chekout the Repo
       uses: actions/checkout@v4
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
-      with:
-        terraform_version: 1.9.8
+    # - name: Setup Terraform
+    #   uses: hashicorp/setup-terraform@v3
+    #   with:
+    #     terraform_version: 1.9.8
 
-    - name: Initialize Terraform
-      id: init
-      run: terraform init
+    # - name: Initialize Terraform
+    #   id: init
+    #   run: terraform init
 
-    - name: Terraform Format
-      id: fmt
-      run: terraform fmt -check
-
-    - name: terraform validate
-      id: validate
-      if: (success() || failure())
-      run: terraform validate
 
     # TFLint - Terraform Check
     - uses: actions/cache@v4
@@ -44,26 +81,27 @@ jobs:
         path: ~/.tflint.d/plugins
         key: ${{ matrix.os }}-tflint-${{ hashFiles('.tflint.hcl') }}
 
+    # Setup TFLint
     - uses: terraform-linters/setup-tflint@v4
       name: Setup TFLint
       with:
         github_token: ${{ secrets.CI_GITHUB_TOKEN }}
 
-# Print TFLint version
+    # Print TFLint version
     - name: Show version
       run: tflint --version
 
-# Install plugins
+    # Install plugins
     - name: Init TFLint
       run: tflint --init
 
-# Run tflint command in each directory recursively # use --force if you want to continue with workflow although errors are there
+    # Run tflint command in each directory recursively # use --force if you want to continue with workflow although errors are there
     - name: Run TFLint
       run: tflint -f compact --recursive
 
   security-scan:
 
-      needs: code-quality
+      needs: [terraform-format, terraform-validate, tf-lint]
 
       defaults:
         run:
