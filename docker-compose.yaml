@@ -11,7 +11,7 @@ services:
   redis:
     platform: linux/amd64
     container_name: redis
-    image: redis:7.4.6-bookworm@sha256:d7432711a2a5c99c2e9dd0e006061cd274d7cb7a9e77f07ffe2ea99e21244677
+    image: redis:8.4.0-bookworm@sha256:c22af04bb576503bf16b3e34a1fd2fd82de0f765afd866d2e380145e0af30d78
     expose:
     - 6379
     ports:
