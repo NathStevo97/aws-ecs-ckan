@@ -1,4 +1,4 @@
-FROM solr:9.8.1-slim@sha256:99469bc1cfee49297d0e943c6255e7b20c9b8cdafb489d203eff9fded1987978
+FROM solr:9.10.1-slim@sha256:fa9c8ca91e639b75f17307dcd88fafd4a567c3de51d1b0c7ee317e1c4c2a55d6
 
 EXPOSE 8983
 
