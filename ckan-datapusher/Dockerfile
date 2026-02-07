@@ -1,6 +1,7 @@
 FROM python:3.9-slim-bookworm@sha256:e11ce62ece77a134eae605d7c76a2515b65f882d7f6d1fa57096a1dff9b723af
 
 ENV DATAPUSHER_HOME=/usr/lib/ckan/datapusher
+ENV DATAPUSHER_SRC=$DATAPUSHER_HOME/src
 
 # install dependencies
 ENV TZ=Etc/UTC
@@ -19,17 +20,18 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # set working directory
-WORKDIR $DATAPUSHER_HOME/src
+WORKDIR $DATAPUSHER_SRC
 
 # clone the datapusher repository
 # this was 0.0.20, which, is no longer loading certain python modules.
 RUN git clone -b '0.0.20' https://github.com/ckan/datapusher.git
 
-WORKDIR $DATAPUSHER_HOME/src/datapusher
+WORKDIR $DATAPUSHER_SRC/datapusher
 
+# upgrade pip
 RUN python -m pip install --upgrade pip
 
-# install datapusher and its dependencies
+# install datapusher and its dependencies from requirements.txt
 COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt --break-system-packages
 RUN pip install -e . --break-system-packages

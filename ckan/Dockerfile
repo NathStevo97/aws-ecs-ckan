@@ -26,14 +26,6 @@ RUN apt-get -q -y update \
 RUN pip install --upgrade awscli
 RUN pip install --upgrade virtualenv
 
-
-# --- install Poetry & plugin ---
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
- && curl -sSL https://install.python-poetry.org | python3 - \
- && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
- && poetry self add poetry-plugin-export \
- && poetry --version
-
 # --- CKAN environment variables ---
 ENV CKAN_HOME=/usr/lib/ckan \
     CKAN_VENV=/usr/lib/ckan/venv \
@@ -51,16 +43,12 @@ RUN mkdir -p $CKAN_VENV $CKAN_CONFIG $CKAN_STORAGE_PATH \
 # --- clone CKAN source ---
 RUN git clone --depth 1 --branch ckan-2.11.3 https://github.com/ckan/ckan.git $CKAN_SRC
 
-# --- copy your Poetry files somewhere safe (not inside CKAN source) ---
-COPY pyproject.toml poetry.lock /tmp/
-
-# --- export dependencies using Poetry ---
-WORKDIR /tmp
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+# --- copy requirements.txt into the image ---
+COPY requirements.txt /tmp/requirements.txt
 
 # --- install dependencies into CKAN virtualenv ---
 RUN $CKAN_VENV/bin/pip install --upgrade pip setuptools wheel \
- && $CKAN_VENV/bin/pip install --no-cache-dir -r requirements.txt
+ && $CKAN_VENV/bin/pip install --no-cache-dir -r /tmp/requirements.txt
 
 # --- install CKAN itself into the same venv ---
 RUN $CKAN_VENV/bin/pip install --no-cache-dir -e $CKAN_SRC

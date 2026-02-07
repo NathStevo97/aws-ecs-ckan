@@ -12,7 +12,7 @@ help:
 	@echo "  tf-test-run    Apply and Destroy Terraform"
 
 ckan-solr-docker:
-	@docker build -t docker.io/nathstevo97/ckan-solr .\ckan-solr
+	@docker build -t docker.io/nathstevo97/ckan-solr ./ckan-solr
 
 ckan-datapusher-docker:
 	@docker build -t docker.io/nathstevo97/ckan-datapusher ./ckan-datapusher
