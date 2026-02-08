@@ -166,7 +166,7 @@ resource "aws_ecs_task_definition" "ckan" {
           value = "${aws_service_discovery_service.datapusher.name}.${aws_service_discovery_private_dns_namespace.ckan-infrastructure.name}"
         },
         {
-          name = "CKAN_DATAPUSHER_API_TOKEN"
+          name  = "CKAN_DATAPUSHER_API_TOKEN"
           value = "string:CHANGE_ME"
         }
       ]

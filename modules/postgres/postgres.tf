@@ -3,14 +3,14 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.91.0"
+      version = ">= 6.31.0"
     }
   }
 }
 
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
-  version = "6.12.0"
+  version = "6.13.1"
 
   # storage
   allocated_storage = 20
@@ -32,9 +32,9 @@ module "rds" {
   # which tries to destroy the current subnet group.
   create_db_subnet_group = true
   engine                 = "postgres"
-  engine_version         = "16.3"
-  family                 = "postgres16"
-  instance_class         = var.instance_class
+  engine_version         = "17.6"
+  family                 = "postgres17"
+  instance_class         = var.rds_instance_class
   major_engine_version   = 11
   multi_az               = true
   db_name                = var.rds_database_name

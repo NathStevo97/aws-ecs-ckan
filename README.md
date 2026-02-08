@@ -42,7 +42,7 @@ No resources.
 | <a name="input_availability_zone_map"></a> [availability\_zone\_map](#input\_availability\_zone\_map) | n/a | `map(any)` | <pre>{<br/>  "eu-west-2a": "eu-west-2a",<br/>  "eu-west-2b": "eu-west-2b",<br/>  "eu-west-2c": "eu-west-2c"<br/>}</pre> | no |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | n/a | `string` | `""` | no |
 | <a name="input_hosted_zone_id"></a> [hosted\_zone\_id](#input\_hosted\_zone\_id) | n/a | `string` | `""` | no |
-| <a name="input_instance_class"></a> [instance\_class](#input\_instance\_class) | Database instance type e.g. db.t2.micro, this can be adjusted to suit using the options at https://aws.amazon.com/rds/instance-types/ | `string` | `"db.t2.micro"` | no |
+| <a name="input_rds_instance_class"></a> [instance\_class](#input\_instance\_class) | Database instance type e.g. db.t2.micro, this can be adjusted to suit using the options at https://aws.amazon.com/rds/instance-types/ | `string` | `"db.t2.micro"` | no |
 | <a name="input_lb_acm_certificate_arn"></a> [lb\_acm\_certificate\_arn](#input\_lb\_acm\_certificate\_arn) | n/a | `string` | `""` | no |
 | <a name="input_rds_database_name"></a> [rds\_database\_name](#input\_rds\_database\_name) | n/a | `string` | `"ckan"` | no |
 | <a name="input_rds_database_password"></a> [rds\_database\_password](#input\_rds\_database\_password) | n/a | `string` | `"ckan"` | no |

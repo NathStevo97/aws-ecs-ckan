@@ -327,7 +327,7 @@ resource "aws_cloudfront_distribution" "distribution" {
     target_origin_id         = "ckan"
     trusted_key_groups       = []
     trusted_signers          = []
-    viewer_protocol_policy = var.domain_name != "" ? "redirect-to-https" : "allow-all"
+    viewer_protocol_policy   = var.domain_name != "" ? "redirect-to-https" : "allow-all"
   }
 
   ordered_cache_behavior {

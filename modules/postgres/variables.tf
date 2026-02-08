@@ -3,7 +3,7 @@ variable "resource_name_prefix" {
   description = "resource name prefix e.g. ckan-poc-"
 }
 
-variable "instance_class" {
+variable "rds_instance_class" {
   type        = string
   description = "Database instance type e.g. db.t2.micro, this can be adjusted to suit using the options at https://aws.amazon.com/rds/instance-types/"
 }

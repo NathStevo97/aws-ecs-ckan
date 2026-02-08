@@ -1,16 +1,6 @@
-variable "resource_name_prefix" {
-  type    = string
-  default = "ckan"
-}
-
-variable "vpc_cidr" {
+variable "admin_cidr_blocks" {
   type    = string
   default = ""
-}
-
-variable "region" {
-  type    = string
-  default = "eu-west-2"
 }
 
 variable "availability_zone_map" {
@@ -22,6 +12,14 @@ variable "availability_zone_map" {
   }
 }
 
+variable "ckan_admin" {
+  type = string
+}
+
+variable "ckan_admin_password" {
+  type = string
+}
+
 variable "domain_name" {
   type    = string
   default = ""
@@ -30,6 +28,27 @@ variable "domain_name" {
 variable "hosted_zone_id" {
   type    = string
   default = ""
+}
+
+variable "rds_instance_class" {
+  type        = string
+  description = "Database instance type e.g. db.t2.micro, this can be adjusted to suit using the options at https://aws.amazon.com/rds/instance-types/"
+  default     = "db.t2.micro"
+}
+
+variable "lb_acm_certificate_arn" {
+  type    = string
+  default = ""
+}
+
+variable "region" {
+  type    = string
+  default = "eu-west-2"
+}
+
+variable "resource_name_prefix" {
+  type    = string
+  default = "ckan"
 }
 
 variable "rds_database_name" {
@@ -47,19 +66,6 @@ variable "rds_database_password" {
   default = "ckan"
 }
 
-variable "instance_class" {
-  type        = string
-  description = "Database instance type e.g. db.t2.micro, this can be adjusted to suit using the options at https://aws.amazon.com/rds/instance-types/"
-  default     = "db.t2.micro"
-}
-
-
-
-variable "admin_cidr_blocks" {
-  type    = string
-  default = ""
-}
-
 variable "rds_readonly_database_name" {
   type    = string
   default = "ckan_readonly"
@@ -74,18 +80,8 @@ variable "rds_readonly_database_password" {
   type    = string
   default = "readonly"
 }
-/*
-variable "ckan_admin" {
-  type = string
-}
 
-variable "ckan_admin_password" {
-  type = string
-}
-*/
-
-
-variable "lb_acm_certificate_arn" {
+variable "vpc_cidr" {
   type    = string
   default = ""
 }

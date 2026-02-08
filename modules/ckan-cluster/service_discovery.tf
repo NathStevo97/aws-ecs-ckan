@@ -18,10 +18,6 @@ resource "aws_service_discovery_service" "datapusher" {
     routing_policy = "MULTIVALUE"
   }
 
-  health_check_custom_config {
-    failure_threshold = 10
-  }
-
   depends_on = [
     aws_ecs_task_definition.datapusher,
   ]
@@ -41,10 +37,6 @@ resource "aws_service_discovery_service" "solr" {
     routing_policy = "MULTIVALUE"
   }
 
-  health_check_custom_config {
-    failure_threshold = 10
-  }
-
   depends_on = [
     aws_ecs_task_definition.solr,
   ]
@@ -62,10 +54,6 @@ resource "aws_service_discovery_service" "ckan" {
     }
 
     routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-    failure_threshold = 10
   }
 
   depends_on = [

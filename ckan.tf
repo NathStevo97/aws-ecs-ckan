@@ -2,7 +2,7 @@
 # VPC Module
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.21.0"
+  version = "6.6.0"
 
   name = "${var.resource_name_prefix}-vpc"
 
@@ -70,7 +70,7 @@ module "postgres" {
   rds_database_password   = var.rds_database_password
   rds_database_username   = var.rds_database_username
   allowed_cidr_blocks     = [var.vpc_cidr, var.admin_cidr_blocks]
-  instance_class          = var.instance_class
+  rds_instance_class      = var.rds_instance_class
 }
 
 # Redis Elasticache Module
