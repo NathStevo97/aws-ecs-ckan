@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bookworm@sha256:a02e9c5406c416c504d6c9a1a306ff4080c3173f1008d192f953bd20382a2d5c
+FROM python:3.9-slim-trixie@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
 
 # install dependencies
 RUN apt-get -q -y update \
@@ -13,6 +13,7 @@ RUN apt-get -q -y update \
         libssl-dev \
         libffi-dev \
         postgresql-client \
+        openssl=3.5.4-1~deb13u2 \
         build-essential \
         git-core \
         vim \
@@ -48,13 +49,13 @@ COPY requirements.txt /tmp/requirements.txt
 
 # --- install dependencies into CKAN virtualenv ---
 RUN $CKAN_VENV/bin/pip install --upgrade pip setuptools wheel \
- && $CKAN_VENV/bin/pip install --no-cache-dir -r /tmp/requirements.txt
+ && $CKAN_VENV/bin/pip install --upgrade --no-cache-dir -r /tmp/requirements.txt
 
 # --- install CKAN itself into the same venv ---
-RUN $CKAN_VENV/bin/pip install --no-cache-dir -e $CKAN_SRC
+RUN $CKAN_VENV/bin/pip install --upgrade --no-cache-dir -e $CKAN_SRC
 
 # --- optional CKAN plugins/extensions ---
-RUN $CKAN_VENV/bin/pip install --no-cache-dir -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
+RUN $CKAN_VENV/bin/pip install --upgrade --no-cache-dir -e 'git+https://github.com/ckan/ckanext-pages.git#egg=ckanext-pages'
 
 # --- finalize runtime setup ---
 RUN ln -s $CKAN_SRC/ckan/config/who.ini $CKAN_CONFIG/who.ini \

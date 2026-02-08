@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bookworm@sha256:a02e9c5406c416c504d6c9a1a306ff4080c3173f1008d192f953bd20382a2d5c
+FROM python:3.9-slim-trixie@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
 
 ENV DATAPUSHER_HOME=/usr/lib/ckan/datapusher
 ENV DATAPUSHER_SRC=$DATAPUSHER_HOME/src
@@ -15,6 +15,7 @@ RUN apt-get update \
         git \
         gettext-base \
         locales-all \
+        openssl=3.5.4-1~deb13u2 \
     && apt-get -y autoremove \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -33,8 +34,8 @@ RUN python -m pip install --upgrade pip
 
 # install datapusher and its dependencies from requirements.txt
 COPY ./requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt --break-system-packages
-RUN pip install -e . --break-system-packages
+RUN pip install -r requirements.txt --upgrade --break-system-packages
+RUN pip install -e . --upgrade --break-system-packages
 
 # entrypoint configuration
 COPY ./datapusher-entrypoint.sh /datapusher-entrypoint.sh
