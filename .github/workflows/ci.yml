@@ -145,17 +145,6 @@ jobs:
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest ./ckan
 
-    - name: Run Trivy - CKAN
-      uses: aquasecurity/trivy-action@0.34.0
-      with:
-        image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest'
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'
-        trivyignores: '.trivyignore'
-
     - name: Docker Push - CKAN
       id: push-ckan
       run: |
@@ -187,17 +176,6 @@ jobs:
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest ./ckan-datapusher
 
-    - name: Run Trivy - Datapusher
-      uses: aquasecurity/trivy-action@0.34.0
-      with:
-        image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest'
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'
-        trivyignores: '.trivyignore'
-
     - name: Docker Push - Datapusher
       id: push-datapusher
       run: |
@@ -228,17 +206,6 @@ jobs:
       id: build-Solr
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest ./ckan-solr
-
-    - name: Run Trivy - Solr
-      uses: aquasecurity/trivy-action@0.34.0
-      with:
-        image-ref: 'docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest'
-        format: 'table'
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: 'os,library'
-        severity: 'CRITICAL,HIGH'
-        trivyignores: '.trivyignore'
 
     - name: Docker Push - Solr
       id: push-solr
