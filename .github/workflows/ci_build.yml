@@ -1,0 +1,89 @@
+name: CI Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ckan-build:
+
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Chekout the Repo
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Docker Build - CKAN
+      id: build-ckan
+      run: |
+        docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest ./ckan
+
+    - name: Docker Push - CKAN
+      id: push-ckan
+      run: |
+        docker image push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest
+
+  ckan-datapusher-build:
+
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Chekout the Repo
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Docker Build - Datapusher
+      id: build-datapusher
+      run: |
+        docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest ./ckan-datapusher
+
+    - name: Docker Push - Datapusher
+      id: push-datapusher
+      run: |
+        docker image push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest
+
+  ckan-solr-build:
+
+    defaults:
+      run:
+        shell: bash
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Chekout the Repo
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Docker Build - Solr
+      id: build-Solr
+      run: |
+        docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest ./ckan-solr
+
+    - name: Docker Push - Solr
+      id: push-solr
+      run: |
+        docker image push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest
