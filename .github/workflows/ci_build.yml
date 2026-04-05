@@ -27,6 +27,14 @@ jobs:
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest ./ckan
 
+    - name: Snyk Scan - CKAN
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan:latest
+        args: --severity-threshold=high
+
     - name: Docker Push - CKAN
       id: push-ckan
       run: |
@@ -55,6 +63,14 @@ jobs:
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest ./ckan-datapusher
 
+    - name: Snyk Scan - Datapusher
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-datapusher:latest
+        args: --severity-threshold=high
+
     - name: Docker Push - Datapusher
       id: push-datapusher
       run: |
@@ -82,6 +98,14 @@ jobs:
       id: build-Solr
       run: |
         docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest ./ckan-solr
+
+    - name: Snyk Scan - Solr
+      uses: snyk/actions/docker@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        image: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/ckan-solr:latest
+        args: --severity-threshold=high
 
     - name: Docker Push - Solr
       id: push-solr
