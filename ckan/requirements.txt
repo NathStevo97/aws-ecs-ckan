@@ -50,6 +50,6 @@ watchdog>=6.0.0
 webassets<=3.0.0
 webencodings==0.5.1
 werkzeug==3.1.6
-wtforms==3.2.1
+wtforms==3.2.2
 zipp==3.23.0
 zope-interface==8.0.1
