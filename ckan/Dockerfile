@@ -1,4 +1,4 @@
-FROM python:3.9-slim-trixie@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
+FROM python:3.14-slim-trixie@sha256:0741d101873c12ab927e6f8653feb8862b9bd58771177acb1b885b95141f91b4
 
 # install dependencies
 RUN apt-get -q -y update \
