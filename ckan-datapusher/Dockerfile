@@ -1,4 +1,4 @@
-FROM python:3.9-slim-trixie@sha256:2d97f6910b16bd338d3060f261f53f144965f755599aab1acda1e13cf1731b1b
+FROM python:3.15-slim-trixie@sha256:2da676046630d7bf14c6764ae1143dc7fa0377a53f94bf5a642f0b214aca5bce
 
 ENV DATAPUSHER_HOME=/usr/lib/ckan/datapusher
 ENV DATAPUSHER_SRC=$DATAPUSHER_HOME/src
