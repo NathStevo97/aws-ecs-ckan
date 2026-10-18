@@ -4,25 +4,6 @@ resource "aws_service_discovery_private_dns_namespace" "ckan-infrastructure" {
   vpc         = var.vpc_id
 }
 
-resource "aws_service_discovery_service" "datapusher" {
-  name = "datapusher"
-
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.ckan-infrastructure.id
-
-    dns_records {
-      ttl  = 10
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  depends_on = [
-    aws_ecs_task_definition.datapusher,
-  ]
-}
-
 resource "aws_service_discovery_service" "solr" {
   name = "solr"
 

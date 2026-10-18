@@ -9,4 +9,3 @@ resource "aws_cloudwatch_log_group" "solr" {
 resource "aws_cloudwatch_log_group" "ckan" {
   name = "/ecs/${var.resource_name_prefix}-ckan"
 }
-

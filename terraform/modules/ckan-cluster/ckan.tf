@@ -13,16 +13,6 @@ resource "aws_security_group" "ckan" {
   }
 }
 
-resource "aws_security_group_rule" "datapusher-to-ckan" {
-  description              = "datapusher-to-ckan"
-  from_port                = 8800
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.ckan.id
-  to_port                  = 8800
-  type                     = "ingress"
-  source_security_group_id = aws_security_group.datapusher.id
-}
-
 resource "aws_security_group_rule" "elb-to-ckan" {
   description              = "elb-to-ckan"
   from_port                = 5000
@@ -161,14 +151,6 @@ resource "aws_ecs_task_definition" "ckan" {
           name  = "SOLR_FQDN",
           value = "${aws_service_discovery_service.solr.name}.${aws_service_discovery_private_dns_namespace.ckan-infrastructure.name}"
         },
-        {
-          name  = "DATAPUSHER_FQDN",
-          value = "${aws_service_discovery_service.datapusher.name}.${aws_service_discovery_private_dns_namespace.ckan-infrastructure.name}"
-        },
-        {
-          name  = "CKAN_DATAPUSHER_API_TOKEN"
-          value = "string:CHANGE_ME"
-        }
       ]
     }
   ])
