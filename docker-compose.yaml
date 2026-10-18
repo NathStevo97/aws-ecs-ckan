@@ -3,9 +3,39 @@ volumes:
   solr:
   postgres:
 
-networks:
-  ecs_demo_ckan_default:
-    external: true
+x-ckan-environment: &ckan-environment
+  CKAN_INI: /srv/app/ckan.ini
+  CKAN_SITE_ID: default
+  CKAN_SITE_URL: http://localhost:5000
+  CKAN_STORAGE_PATH: /var/lib/ckan
+  CKAN_SQLALCHEMY_URL: postgresql://ckan_default:fearless@postgres/ckan_default # pragma: allowlist secret
+  CKAN_DATASTORE_WRITE_URL: postgresql://ckan_default:fearless@postgres/datastore # pragma: allowlist secret
+  CKAN_DATASTORE_READ_URL: "postgresql://datastore_ro:${DATASTORE_PASSWORD:?Set DATASTORE_PASSWORD in the environment or .env}@postgres/datastore" # pragma: allowlist secret
+  CKAN_SOLR_URL: http://solr:8983/solr/ckan
+  CKAN_REDIS_URL: redis://redis:6379/1
+  CKAN__PLUGINS: image_view text_view datatables_view datastore envvars pages xloader
+  CKAN___BEAKER__SESSION__SECRET: local-development-session-secret # pragma: allowlist secret
+  CKAN___SECRET_KEY: local-development-secret-key # pragma: allowlist secret
+  CKAN___WTF_CSRF_SECRET_KEY: local-development-csrf-secret # pragma: allowlist secret
+  CKAN___API_TOKEN__JWT__ENCODE__SECRET: string:local-development-api-token-secret # pragma: allowlist secret
+  CKAN___API_TOKEN__JWT__DECODE__SECRET: string:local-development-api-token-secret # pragma: allowlist secret
+  CKAN__SITE_TITLE: CKAN
+  CKAN__SITE_DESCRIPTION: CKAN
+  CKAN__SITE_INTRO_TEXT: Welcome to CKAN!
+  CKAN__JOBS__TIMEOUT: "180"
+  CKANEXT__XLOADER__FORMATS: csv tsv application/csv
+  CKANEXT__XLOADER__JOBS_DB__URI: postgresql://ckan_default:fearless@postgres/ckan_default # pragma: allowlist secret
+  CKANEXT__XLOADER__SHOW_BADGES: "True"
+  CKANEXT__XLOADER__CLEAN_DATASTORE_TABLES: "False"
+  CKANEXT__PAGES__EDITOR: ckeditor
+  CKAN_SYSADMIN_NAME: ckan_admin
+  CKAN_SYSADMIN_PASSWORD: test1234 # pragma: allowlist secret
+  CKAN_SYSADMIN_EMAIL: admin@example.com
+  CKAN___SMTP__SERVER: smtp:1025
+  CKAN___SMTP__STARTTLS: "False"
+  CKAN___SMTP__USER: fake
+  CKAN___SMTP__PASSWORD: fake # pragma: allowlist secret
+  CKAN___SMTP__MAIL_FROM: admin@localhost
 
 services:
   redis:
@@ -26,37 +56,20 @@ services:
     container_name: postgres
     image: postgres:16.10-alpine@sha256:7898d413578ff5fa67ce49233cc9743e282010eb2ec6ebf7834a63f4a60b05f0
     environment:
-    - POSTGRES_PASSWORD=fearless
-    - POSTGRES_USER=ckan_default
-    - POSTGRES_DB=ckan_default
-    - PGDATA=/var/lib/postgresql/data/
-    expose:
-    - 5433
+      POSTGRES_PASSWORD: fearless # pragma: allowlist secret
+      POSTGRES_USER: ckan_default
+      POSTGRES_DB: ckan_default
+      PGDATA: /var/lib/postgresql/data/
+      DATASTORE_PASSWORD: ${DATASTORE_PASSWORD:?Set DATASTORE_PASSWORD in the environment or .env} # pragma: allowlist secret
     ports:
-    - 0.0.0.0:5432:5432
+      - "5432:5432"
     volumes:
-    - postgres:/var/lib/postgresql@16/data:rw
+      - postgres:/var/lib/postgresql/data
+      - ./ckan/init-datastore.sql:/docker-entrypoint-initdb.d/10-init-datastore.sql:ro
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "ckan_default"]
-
-  datapusher:
-    platform: linux/amd64
-    container_name: datapusher
-    image: ckan-datapusher
-    build:
-      context: ./ckan-datapusher
-    environment:
-    - DATAPUSHER_PORT=8800
-    expose:
-    - 8800
-    ports:
-    - 0.0.0.0:8800:8800
-    extra_hosts:
-    - "host.docker.internal:host-gateway"
-    healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
+      test: ["CMD-SHELL", "pg_isready -U ckan_default -d ckan_default"]
 
   solr:
     platform: linux/amd64
@@ -78,60 +91,52 @@ services:
   ckan:
     platform: linux/amd64
     container_name: ckan
-    image: ckan
+    image: ckan:2.12.0
     build:
       context: ./ckan
     expose:
-    - 5000
+      - 5000
     depends_on:
+      postgres:
+        condition: service_healthy
       solr:
         condition: service_healthy
       redis:
         condition: service_healthy
     ports:
-    - 0.0.0.0:5000:5000
-    environment:
-    # Environment Specific
-    - CKAN_PORT=5000
-    - POSTGRES_FQDN=postgres
-    - REDIS_FQDN=redis
-    - SOLR_FQDN=solr
-    - DATAPUSHER_FQDN=datapusher
-    - CKAN_SITE_URL=http://0.0.0.0
-    #- CKAN_ROOT_PATH=/ckan/{{LANG}}
-    - CKAN_DATAPUSHER_CALLBACK_URL=http://0.0.0.0/ckan
-    #- CKAN_SMTP_ERROR_MAIL_TO=devops@example.com
-    #- CKAN_SMTP_ERROR_MAIL_FROM=errors@example.com
-    #- CKAN_SMTP_MAIL_FROM=admin@example.com
-    - SMTP_FQDN=smtp
-    - SMTP_PORT=1025
-    # Secrets
-    - APP_UUID=AAAAAAAA-0000-1111-2222-BBBBBBBBBBBB
-    - CKAN_API_TOKEN_SECRET=9OzsqKgYG4o_-6RGZ14ebdsh6
-    - CKAN_SMTP_PASSWORD=fake
-    - CKAN_SMTP_USER=fake
-    - POSTGRES_PASSWORD=fearless
-    - POSTGRES_USER=ckan_default
-    - POSTGRES_DB=ckan_default
-    - DATASTORE_DB=datastore
-    - DATASTORE_ROLENAME=datastore_ro
-    - DATASTORE_PASSWORD=datastore
-    - SESSION_SECRET=AAAAAAAAAAAAAAAAAAAAAAAAA
-    - CKAN_DATAPUSHER_API_TOKEN=AAAAAAAA-0000-1111-2222-BBBBBBBBBBBB
+      - "5000:5000"
+    environment: *ckan-environment
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"
     volumes:
-    - ckan:/var/lib/ckan/
+      - ckan:/var/lib/ckan
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/api/action/status_show"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  ckan-worker:
+    platform: linux/amd64
+    container_name: ckan-worker
+    image: ckan:2.12.0
+    depends_on:
+      ckan:
+        condition: service_healthy
+    command: ["/srv/app/start_ckan_worker.sh"]
+    environment: *ckan-environment
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ckan:/var/lib/ckan
 
   smtp:
     platform: linux/amd64
     image: reachfive/fake-smtp-server
-    expose:
-    - 1025
-    - 1080
     ports:
-    - 0.0.0.0:1025:1025
-    - 0.0.0.0:1080:1080
+      - "1025:1025"
+      - "1080:1080"
     command: ["node", "index.js", "--auth", "fake:fake"]
     extra_hosts:
-    - "host.docker.internal:host-gateway"
+      - "host.docker.internal:host-gateway"

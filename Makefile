@@ -14,8 +14,6 @@ help:
 ckan-solr-docker:
 	@docker build -t docker.io/nathstevo97/ckan-solr ./ckan-solr
 
-ckan-datapusher-docker:
-	@docker build -t docker.io/nathstevo97/ckan-datapusher ./ckan-datapusher
 
 ckan-docker:
 	@docker build -t docker.io/nathstevo97/ckan ./ckan

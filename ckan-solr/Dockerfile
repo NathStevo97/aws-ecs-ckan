@@ -13,7 +13,7 @@ RUN cd /opt/solr/server/solr-webapp/webapp/WEB-INF/lib/ && \
 
 RUN cp -R $SOLR_CONFIG_DIR/_default $SOLR_CONFIG_DIR/ckan
 
-ADD https://raw.githubusercontent.com/ckan/ckan/master/ckan/config/solr/schema.xml $SOLR_SCHEMA_FILE
+ADD https://raw.githubusercontent.com/ckan/ckan/ckan-2.12.0/ckan/config/solr/schema.xml $SOLR_SCHEMA_FILE
 RUN chmod 644 $SOLR_SCHEMA_FILE
 
 USER solr
