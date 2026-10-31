@@ -15,7 +15,7 @@ repos:
       args: [ --fix ]
     - id: ruff-format
 -   repo: https://github.com/AleksaC/terraform-py
-    rev: d72dfd5bd3694fb37d14151a9f06247ebafbb42a # v1.16.6 # pragma: allowlist secret
+    rev: d008b4581398baf3edf27158c4bdbe37fe38753e # v1.17.1 # pragma: allowlist secret
     hooks:
       - id: tf-fmt
       - id: tf-validate
