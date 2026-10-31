@@ -12,11 +12,11 @@ help:
 	@echo "  tf-test-run    Apply and Destroy Terraform"
 
 ckan-solr-docker:
-	@docker build -t docker.io/nathstevo97/ckan-solr ./ckan-solr
+	@docker build -t docker.io/nathstevo97/ckan-solr ./src/ckan-solr
 
 
 ckan-docker:
-	@docker build -t docker.io/nathstevo97/ckan ./ckan
+	@docker build -t docker.io/nathstevo97/ckan ./src/ckan
 
 ckan-build:
 	@docker-compose -f docker-compose.yaml build
