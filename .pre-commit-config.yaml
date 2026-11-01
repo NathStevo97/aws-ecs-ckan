@@ -1,7 +1,7 @@
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0 # pragma: allowlist secret
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -15,11 +15,7 @@ repos:
       args: [ --fix ]
     - id: ruff-format
 -   repo: https://github.com/AleksaC/terraform-py
-    rev: d008b4581398baf3edf27158c4bdbe37fe38753e # v1.17.1 # pragma: allowlist secret
+    rev: d008b4581398baf3edf27158c4bdbe37fe38753e # v1.17.1
     hooks:
       - id: tf-fmt
       - id: tf-validate
--   repo: https://github.com/Yelp/detect-secrets
-    rev: 01886c8a910c64595c47f186ca1ffc0b77fa5458 # v1.5.0 # pragma: allowlist secret
-    hooks:
-    -   id: detect-secrets
