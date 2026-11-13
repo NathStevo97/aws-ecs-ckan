@@ -59,7 +59,7 @@ services:
   postgres:
     platform: linux/amd64
     container_name: postgres
-    image: postgres:16.10-alpine@sha256:7898d413578ff5fa67ce49233cc9743e282010eb2ec6ebf7834a63f4a60b05f0
+    image: postgres:18.7-alpine@sha256:75dcac3dfb1cd01ca3536910bbc84128759362f8b118bf8c55b38a94f68f3b73
     environment:
       POSTGRES_PASSWORD: fearless # pragma: allowlist secret
       POSTGRES_USER: ckan_default
